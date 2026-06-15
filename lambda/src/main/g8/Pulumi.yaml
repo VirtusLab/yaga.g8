@@ -1,3 +1,0 @@
-name: $name$
-runtime: scala
-description: AWS Lambda infrastructure for $name$
