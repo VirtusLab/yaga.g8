@@ -2,6 +2,8 @@
 
 [Giter8](http://www.foundweekends.org/giter8/) templates for [Yaga](https://github.com/VirtusLab/yaga) projects.
 
+Each template lives on its own branch. Use `--branch` to select one.
+
 ## Available templates
 
 ### AWS Lambda (ScalaJS)
@@ -9,17 +11,17 @@
 Two lambdas (parent calling child) with Besom infrastructure.
 
 ```
-sbt new VirtusLab/yaga.g8 --directory=lambda
+sbt new VirtusLab/yaga.g8 --branch=aws-lambda-js
 ```
 
 ### Kubernetes JVM Service (coming soon)
 
 ```
-sbt new VirtusLab/yaga.g8 --directory=k8s-jvm
+sbt new VirtusLab/yaga.g8 --branch=k8s-jvm
 ```
 
 ### Kubernetes WASM Service (coming soon)
 
 ```
-sbt new VirtusLab/yaga.g8 --directory=k8s-wasm
+sbt new VirtusLab/yaga.g8 --branch=k8s-wasm
 ```
