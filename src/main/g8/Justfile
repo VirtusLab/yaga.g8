@@ -1,0 +1,52 @@
+export PULUMI_CONFIG_PASSPHRASE := ""
+export BESOM_SBT_MODULE := "infra"
+
+# Build WASM binaries for both services
+wasm-build:
+    sbt childServiceJS/fastLinkJS parentServiceJS/fastLinkJS
+
+# Run child-service locally with wasmtime (port 8080)
+run-child:
+    wasmtime serve -Scli -Wgc,function-references,exceptions \
+      --addr 127.0.0.1:8080 \
+      --env YAGA_WASM_SERVICE_CONFIG='{"greeting":"Hello"}' \
+      child-service/js/target/*/child-service-fastopt/main.wasm
+
+# Run parent-service locally with wasmtime (port 8081, expects child on 8080)
+run-parent:
+    wasmtime serve -Scli -Wgc,function-references,exceptions \
+      --addr 127.0.0.1:8081 \
+      --env YAGA_WASM_SERVICE_CONFIG='{"childService":{"uri":"http://127.0.0.1:8080"}}' \
+      parent-service/js/target/*/parent-service-fastopt/main.wasm
+
+# Deploy infrastructure with Pulumi
+infra-up:
+    pulumi up --yes
+
+# Preview infrastructure changes
+infra-preview:
+    pulumi preview
+
+# Destroy infrastructure
+infra-down:
+    pulumi destroy --yes
+
+# Show stack outputs
+infra-output:
+    pulumi stack output
+
+# Create the k8s RuntimeClass for wasmtime (run once per cluster)
+create-runtime-class:
+    kubectl apply -f - <<EOF
+    apiVersion: node.k8s.io/v1
+    kind: RuntimeClass
+    metadata:
+      name: wasmtime
+    handler: wasmtime
+    EOF
+
+# Build the patched runwasi shim from vendor/runwasi
+build-shim:
+    cd vendor/runwasi && cargo build --release -p containerd-shim-wasmtime
+    @echo "Shim binary: vendor/runwasi/target/release/containerd-shim-wasmtime-v1"
+    @echo "Copy it to /usr/local/bin/ on your k8s node(s)"
